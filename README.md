@@ -114,7 +114,7 @@ Optimized Query:
 
     SELECT asset.asset_name, revision.note, revision.edit_date, revision.editor 
     FROM asset 
-    JOIN revision ON asset.revision_note = revision.note 
+    JOIN revision ON asset.note = revision.note 
     WHERE revision.edit_date >= '2015-01-01' 
     ORDER BY revision.edit_date DESC 
     LIMIT 10; 
@@ -132,11 +132,11 @@ The LIMIT clause restricts the output to the top 10 records, improving query eff
 
 Potential Optimization: 
 
-Creating indexes on `asset.revision_note and revision.edit_date` can enhance the performance of the query, especially when dealing with large datasets. 
+Creating indexes on `asset.note and revision.edit_date` can enhance the performance of the query, especially when dealing with large datasets. 
 
 
 
-    CREATE INDEX idx_asset_revision_note ON asset (revision_note); 
+    CREATE INDEX idx_asset_note ON asset (revision_note); 
     CREATE INDEX idx_revision_edit_date ON revision (edit_date); 
 
  
@@ -177,9 +177,9 @@ Optimized Query:
 
     SELECT asg.subgroup, COUNT(*) AS occupied_assets 
     FROM asset a 
-    JOIN asset_subgroup asg ON a.asset_subgroup = asg.subgroup 
+    JOIN asset_subgroup asg ON a.subgroup = asg.subgroup 
     WHERE a.occupant IS NOT NULL 
-    GROUP BY asg.subgroup; 
+    GROUP BY asg.subgroup;
 
 Explanation: 
 
