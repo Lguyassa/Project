@@ -48,64 +48,97 @@ The query aims to address the problem of finding the two assets with the smalles
 This query is counting the number of assets that are currently in use (occupied) and grouping them based on their categories (subgroups). 
 
 **Data Structure and Normalization Process** 
+The ERD involve creating tables, inserting data, and establishing relationships between the tables.  The structure of the data and the normalization process are based on the information provided. The provided SQL script outlines the creation of several tables (opa, site, revision, asset_subtype, asset_subgroup, asset, and bldg) along with the insertion of data into these tables. Below is a summary of the structure and relationships among these tables:
 
- 
+opa Table:
 
-The ERD involve creating tables, inserting data, and establishing relationships between the tables.  The structure of the data and the normalization process are based on the information provided. 
+Primary Key: opa_id
+Columns: opa_id, opa_owner, opa_address
+site Table:
 
-**Data Structure:**
-`opa` Table: 
-Attributes: `opa_id` (Primary Key), `opa_owner`, `opa_address` 
-Purpose: Represents information related to the Office of Property Assessment. 
+Primary Key: site_name
+Columns: site_code, site_acres, primary_site, secondary_site, site_name
+revision Table:
 
-`site` Table: 
-Attributes: `site_code` (Primary Key), `site_acres, primary_site, secondary_site, site_address` 
-Purpose: Contains information about different sites. 
+Primary Key: note
+Columns: note, edit_date, edit_source, editor
+asset_subtype Table:
 
-`revision` Table: 
-Attributes: `note` (Primary Key), `edit_date, edit_source, editor` 
-Purpose: Captures revision details. 
+Primary Key: subtype
+Columns: subtype, description
+asset_subgroup Table:
 
-`asset_subtype` Table: 
-Attributes: `subtype (Primary Key), description` 
-Purpose: Represents subtypes of assets. 
+Primary Key: subgroup
+Columns: subgroup, description
+asset Table:
 
-`asset_subgroup` Table: 
-Attributes: `subgroup (Primary Key), description` 
-Purpose: Represents subgroups of assets. 
+Primary Key: gid
+Foreign Keys: note (References revision), opa_id (References opa), subtype (References asset_subtype), site_name (References site), subgroup (References asset_subgroup)
+Columns: gid, asset_id, asset_name, asset_type, asset_address, status, geom, city_owned, not_public, cityown_desc, serving_type, occupant, opa_id, site_name, subgroup, subtype, note
+bldg Table:
 
-`asset` Table: 
-Attributes: `gid (Primary Key), asset_name, asset_type, asset_address, status, geom (Point geometry with SRID 2272)`, and several other attributes. 
+Primary Key: bldg_id
+Foreign Key: asset_id (References asset)
+Columns: bldg_id, sharebldg, asset_id
+Normalization Process:
 
-    Foreign Keys: opa_id, site_code, revision_note, asset_subtype, asset_subgroup 
-Purpose: Represents information about assets with relationships to other lookup tables. 
+Normalization involves organizing data to eliminate redundancy and dependency issues.
+The script creates separate tables for different entities such as opa, site, revision, asset_subtype, asset_subgroup, asset, and bldg.
+Each table has a primary key to uniquely identify records, and foreign keys establish relationships between tables.
+ERD (Entity-Relationship Diagram):
 
-`bldg` Table: 
-Attributes: `bldg_id (Primary Key), bldg_age, bldg_fl, bldg_sqft, bldg_sqftuse, bldg_yr, asset_gid (Foreign Key), shared_bldg` 
-Purpose: Contains details about buildings with a relationship to the asset table. 
++-----------------+    +--------------+    +----------------+    +-------------------+
+|      opa        |    |    site      |    |    revision    |    |   asset_subtype   |
++-----------------+    +--------------+    +----------------+    +-------------------+
+| opa_id (PK)     |    | site_name (PK)|    | note (PK)      |    | subtype (PK)      |
+| opa_owner        |    | site_code     |    | edit_date       |    | description       |
+| opa_address      |    | site_acres    |    | edit_source     |    +-------------------+
++-----------------+    | primary_site  |    | editor          |
+                      | secondary_site|    +----------------+
+                      +--------------+
 
-**Normalization Process:** 
-Primary Keys: 
-Each table has a primary key that uniquely identifies each record. Primary keys are used to establish relationships between tables. 
-Foreign Keys: 
-Foreign keys are used to establish relationships between the asset table and lookup tables (opa, site, revision, asset_subtype, asset_subgroup). 
-
-Lookup Tables: 
-Lookup tables (opa, site, revision, asset_subtype, asset_subgroup) help maintain data integrity and avoid data duplication by storing unique values that are referenced by other tables. 
-
++-------------------+   +----------------+   +------------------+   +------------------+
+| asset_subgroup    |   |      asset     |   |      bldg        |   |    City_Facilities|
++-------------------+   +----------------+   +------------------+   +------------------+
+| subgroup (PK)     |   | gid (PK)       |   | bldg_id (PK)     |   | gid              |
+| description       |   | asset_id       |   | sharebldg        |   | asset_id         |
++-------------------+   | asset_name     |   | asset_id (FK)    |   | asset_name       |
+                       | asset_type     |   +------------------+   | asset_type       |
+                       | asset_address  |                           | asset_addr       |
+                       | status         |                           | status           |
+                       | geom           |                           | geom             |
+                       | city_owned     |                           | cityowned        |
+                       | not_public     |                           | not_public       |
+                       | cityown_desc   |                           | cityuse_de       |
+                       | serving_type   |                           | serving_ty       |
+                       | occupant       |                           | occupant         |
+                       | opa_id (FK)    |                           | opa_id           |
+                       | site_name (FK) |                           | site_name        |
+                       | subgroup (FK)  |                           | asset_subgroup   |
+                       | subtype (FK)   |                           | asset_subtype    |
+                       | note (FK)      |                           | editnote1        |
+                       +----------------+                           +------------------+
+This diagram represents the relationships between the tables. Arrows indicate foreign key relationships, and (PK) denotes the primary key. 
 ERD (Entity-Relationship Diagram) 
 
 ![ERD_Project_final](https://github.com/Lguyassa/Project/assets/89851403/713fb6de-b109-4dc6-99ec-b2a00125d1e4)
-
 
 Figure.1.2     ERD (Entity-Relationship Diagram) 
 
 This ERD illustrates the relationships between different tables, including primary and foreign keys. Arrows indicate the direction of the relationship, and cardinality notation represents how many records in one table relate to another. 
 
- The normalization process aims to reduce data redundancy, improve data integrity, and make the database more efficient. 
+ The normalization process aims to reduce data redundancy, improve data integrity, and make the database more efficient.
+
+**Normalization Process:** 
+Primary Keys: 
+Each table has a primary key that uniquely identifies each record. Primary keys are used to establish relationships between tables. 
+Foreign Keys: 
+Foreign keys are used to establish relationships between the asset table and lookup tables (opa, site, note, asset_subtype, asset_subgroup). 
+
+Lookup Tables: 
+Lookup tables (opa, site, revision, asset_subtype, asset_subgroup) help maintain data integrity and avoid data duplication by storing unique values that are referenced by other tables. 
 
  
-
 Query 1: Top 10 Most Recent Revision Details 
 
 Question: What are the top 10 most recent revision details, including asset names, revision notes, and edit dates for assets with revision notes created on or after January 1, 2015? 
