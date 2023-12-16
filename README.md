@@ -173,12 +173,6 @@ Creating a spatial index on the `geom` column can significantly speed up spatial
 Query 3: Count Occupied Assets by Subgroup 
 Question: How many assets are currently occupied within each subgroup, categorized by asset subgroup? 
 
- 
-
- 
-
- 
-
 Optimized Query: 
 
     SELECT asg.subgroup, COUNT(*) AS occupied_assets 
@@ -351,6 +345,7 @@ CREATE TABLE  asset_subtype  (
 );
 
 ----- Insert into asset_subtype_lookup
+
 INSERT into asset_subtype (subtype, description)
 VALUES  ('C1', 'Airport Airfield'),
   ('C2', 'Airport Terminal\Hanger'),
@@ -470,6 +465,7 @@ VALUES  ('C1', 'Airport Airfield'),
   ('D32', 'Historic House\Site');
  
 ---CREATE TABLE asset_subgroup
+
  CREATE TABLE  asset_subgroup  (
    subgroup  text,
    description  text,
@@ -477,6 +473,7 @@ VALUES  ('C1', 'Airport Airfield'),
 );
 
 --- Insert into asset_subgroup_lookup table
+
 INSERT into asset_subgroup (subgroup, description)
 VALUES  ('A1', 'Airports'),
   ('A2', 'City Operations'),
@@ -499,6 +496,7 @@ VALUES  ('A1', 'Airports'),
   ('A13.3', 'Prisons All (Prison facilities)');
  
  ------CREATE  asset TABLE-----------------
+ 
 CREATE TABLE   asset   (
     gid   int primary key,
     asset_id int,
@@ -525,6 +523,7 @@ CREATE TABLE   asset   (
 );
 
 	-- Insert into asset
+ 
 	INSERT INTO asset (
 	gid, asset_name, asset_type, asset_address, status, geom, site_name, asset_id, city_owned,
 	not_public, cityown_desc, serving_type, occupant, opa_id, 
@@ -542,6 +541,7 @@ CREATE TABLE   asset   (
 	INNER JOIN site ON asset.site_name = site.site_name;
 
 ---CREATE TABLE bldg
+
 CREATE TABLE  bldg  (
    bldg_id  int PRIMARY KEY,
    asset_id  int,
@@ -550,6 +550,7 @@ CREATE TABLE  bldg  (
 );
 
 -- Insert into bldg
+
 INSERT INTO bldg (bldg_id, sharebldg, asset_id)
 SELECT cf.buildingid, cf.sharebldg_ , cf.asset_id
 from (
@@ -565,6 +566,7 @@ Data Dictionary
 
 Field Name ,     Description ,   Type                                                                          
 ASSET_ADDR ,  , OPA address based on parcel where available, otherwise the address is specified by data source. If both OPA and alternate address are available, OPA takes precedence. ,     Text  
+
 asset_subtype (subtype, description) 
     VALUES ('C1', 'Airport Airfield'), 
     ('C2', 'Airport Terminal\Hanger'), 
@@ -682,9 +684,11 @@ asset_subtype (subtype, description)
     ('D30', 'Fresh Water Pumping Station'), 
     ('D31', 'Waste Water Pumping Station'), 
     ('D32', 'Historic House\Site'); 
+    
 Asset_Type ,  , Basic categorization of asset as building, land, equipment, etc. Geodatabase coded
  asset_type (Building, Equipment, Land, Structure, Parking Lot, Pier, Other) 
             Values (B1, B2, B3, B4, B5, B6, B7) ,Text  
+	    
 Bldg_Age ,  , Age of building as of 2015 ,                      Numeric  
 Bldg_FL ,  , Number of floors per building (per OPA data where available.) ,            Numeric  
 Bldg_SQFT ,  , Building square footage ,                         Numeric  
