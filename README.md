@@ -95,7 +95,10 @@ Lookup tables (opa, site, revision, asset_subtype, asset_subgroup) help maintain
 
 ERD (Entity-Relationship Diagram) 
 
-Figure.1.2     ERD (Entity-Relationship Diagram) see  - milestone_2
+![ERD_Project_final](https://github.com/Lguyassa/Project/assets/89851403/713fb6de-b109-4dc6-99ec-b2a00125d1e4)
+
+
+Figure.1.2     ERD (Entity-Relationship Diagram) 
 
 This ERD illustrates the relationships between different tables, including primary and foreign keys. Arrows indicate the direction of the relationship, and cardinality notation represents how many records in one table relate to another. 
 
@@ -222,6 +225,7 @@ e) Load Data in QGIS: Open QGIS, create schema Postgres and navigate to the Data
 f) Review Loaded Data: Verify that the data is loaded successfully in QGIS. Check for any errors or warnings during the loading process. 
 
  
+![image](https://github.com/Lguyassa/Project/assets/89851403/75e81905-947f-40d8-aa55-07cda9b6ea12)
 
  
 
@@ -265,294 +269,296 @@ f) Review Loaded Data: Verify that the data is loaded successfully in QGIS. Chec
  
 
 Appendix – 2 
-
 Normalization Scripts 
-
 ----the original file SRID 4326 , WGS84 (lat,lng) 
 -- new SRID 2272, NAD83 / Pennsylvania South (ftUS) 
 ---the data is uploaded	in a public schema as 'City_Facilities_pub' and renamed to City_facilities 
 
- 
-
     set search_path to public; 
 
+--Create a lookup table for the opa column 
+CREATE TABLE  opa  (
+   opa_id  text ,
+   opa_owner  text,
+   opa_address  text,
+   PRIMARY key ( opa_id )
+);
+
+-- Insert into opa_lookup
+INSERT INTO opa (
+  opa_id, 
+  opa_owner, 
+  opa_address
+)
+select 
+  cf.opa_id,
+  cf.opa_owner,
+  cf.opa_addr 
+FROM (
+    select cf.opa_id, cf.opa_owner, cf.opa_addr,  
+    row_NUMBER() over (partition by cf.opa_id order by cf.opa_id) as rn 
+  from city_facilities cf
+ where cf.opa_id is NOT NULL
+) cf
+where cf.rn = 1;
+
+----Create a lookup table for the site_lookup column
+CREATE TABLE  site  (
+   site_code  text,
+   site_acres  int,
+   primary_site  text,
+   secondary_site  text,
+   site_name  text,
+  PRIMARY KEY ( site_name )
+);
+
+-- Insert into site_lookup
+INSERT INTO site (site_code, site_acres, primary_site, secondary_site, site_name)
+select cf.site_code, cf.site_acres, cf.primarysit, cf.secondarys, cf.site_name
+FROM (
+    select cf.site_code, cf.site_acres, cf.primarysit, cf.secondarys, cf.site_name,  
+    row_number () over (partition by cf.site_name order by cf.site_name) as rn 
+  from city_facilities cf
+ where cf.site_name  is NOT NULL
+) as cf
+where cf.rn = 1;
+
+---- Create a lookup table for the revision_lookup column
+ CREATE TABLE  revision  (
+   note  text,
+   edit_date  text,
+   edit_source  text,
+   editor  text,
+  PRIMARY KEY ( note )
+);
+
+-- Insert into revision_lookup
+INSERT INTO revision (note, edit_date, edit_source, editor)
+SELECT cf.editnote1,cf.editdate, cf.editsource, cf.editor
+FROM (
+     select cf.editnote1,cf.editdate, cf.editsource, cf.editor,
+      row_number () over (partition by cf.editnote1 order by cf.editnote1) as rn
+FROM City_Facilities cf
+where cf.editnote1 is not null 
+) as cf
+where cf.rn = 1;
+
+
+CREATE TABLE  asset_subtype  (
+   subtype  text,
+   description  text,
+  PRIMARY KEY ( subtype )
+);
+
+----- Insert into asset_subtype_lookup
+INSERT into asset_subtype (subtype, description)
+VALUES  ('C1', 'Airport Airfield'),
+  ('C2', 'Airport Terminal\Hanger'),
+  ('C4', 'Basketball Court1'), 
+  ('C5', 'Barn\Stables'),
+  ('C3', 'Athletic Field\Soccer Field'),
+  ('C6', 'Bocci Court'),
+  ('C7', 'Bridge'),
+  ('C8', 'City-Owned Land'),
+  ('C9', 'Compost\Recycling Center'),
+  ('C10', 'Concessions\Retail\Cafe'),
+  ('C11', 'Detention Center Adult'),
+  ('C12', 'Detention Center Youth'),  
+  ('C13', 'Golf Driving Range'),
+  ('C14', 'Fire Station'),
+  ('C15', 'Fire Station Marine'),
+  ('C16', 'Fountain'),
+  ('C17', 'Garage\Maintenance Building'),
+  ('C18', 'Golf Course'),
+  ('C19', 'Greenhouse\Nursery'),
+  ('C20', 'Health Center'),
+  ('C21', 'Historic House\Site'),
+  ('C22', 'Housing\Group Quarters'),
+  ('C23', 'Ice Rink'),
+  ('C24', 'Laboratory'),
+  ('C25', 'Library Branch'),
+  ('C26', 'Library Central'),
+  ('C27', 'Library Operations'),
+  ('C28', 'Library Regional'),
+  ('C29', 'Library Specialized'),
+  ('C30', 'Linear Park\Parkway'),
+  ('C31', 'Breezeway\Island\Managed Area'),
+  ('C32', 'Kennel'),
+  ('C33', 'Materials Yard'),
+  ('C34', 'Multi-Use\Office Building'),
+  ('C35', 'Museum'),
+  ('C36', 'Neighborhood Park'),
+  ('C37', 'Nursing Home'),
+  ('C38', 'Older Adult Center'),
+  ('C39', 'Parking Lot'),
+  ('C40', 'Pavilion\Shelter'),
+  ('C41', 'Pier'),
+  ('C42', 'Playground'),
+  ('C43', 'Police Station'),
+  ('C44', 'Police Sub-Station'),
+  ('C45', 'Police Operations\Unit'),
+  ('C46', 'Pool'),
+  ('C47', 'Radio\Cell Tower'),
+  ('C48', 'Public Safety Training Center'),
+  ('C49', 'Recreation Building'),
+  ('C50', 'Recreation Center'),
+  ('C51', 'Recreation Other'),
+  ('C54', 'Regional\Metro Park'),
+  ('C55', 'Restrooms'),
+  ('C56', 'Fish Ladder'),
+  ('C57', 'Salt Shed'),
+  ('C58', 'Skateboard Park'),
+  ('C60', 'Spray Ground'),
+  ('C61', 'Square\Plaza'),
+  ('C63', 'Stage\Stands'),
+  ('C64', 'Statue\Monument'),
+  ('C65', 'Shed'),
+  ('C67', 'Tennis Court'),
+  ('C68', 'Athletic Track'),
+  ('C69', 'Trailers'),
+  ('C70', 'Transfer Station'),
+  ('C71', 'Transit Station'),
+  ('C73', 'Warehouse'),
+  ('C74', 'Waste Water Storage'),
+  ('C75', 'Waste Water Processing Facility'),
+  ('C76', 'Water Pumping Station'),
+  ('C77', 'Water Filter\Processing Facility'),
+  ('C78', 'Water Storage'),
+  ('C79', 'Watershed\Conservation Park'),
+  ('C80', 'Zoo\Animal Habitat'),
+  ('C81', 'Other'),
+  ('C82', 'Fuel Pump'),
+  ('C83', 'Helipad'),
+  ('C84', 'Dog Run'),
+  ('C85', 'Volleyball Court'),
+  ('C86', 'Judicial Court Building'),
+  ('C87', 'Baseball Field'),
+  ('C88', 'Street Hockey Court\Rink'),
+  ('C89', 'Batting Cage'),
+  ('C90', 'Handball Court'),
+  ('C91', 'Recreation/Bike Trail'),
+  ('C92', 'Generator'),
+  ('C93', 'Dam'),
+  ('D1', 'Warehouse'),
+  ('D2', 'Automotive Shop'),
+  ('D3', 'Operations Center'),
+  ('D4', 'Training Center'),
+  ('D5', 'Marine Unit'),
+  ('D6', 'Gymnasium'),
+  ('D8', 'Indoor'),
+  ('D9', 'Maintenance Shop'),
+  ('D10', 'Multi-Use\Office Building'),
+  ('D11', 'Non-Programmed Recreation'),
+  ('D12', 'Office Building'),
+  ('D13', 'Park Land'),
+  ('D14', 'Judicial Court'),
+  ('D15', 'Outdoor'),
+  ('D16', 'Pier'),
+  ('D17', 'Playground Equipment'),
+  ('D18', 'Programmed Recreation'),
+  ('D20', 'Vacant'),
+  ('D22', 'Recreation Land'),
+  ('D23', 'Laboratory'),
+  ('D24', 'Police Station'),
+  ('D25', 'Police Unit'),
+  ('D26', 'Fire Station'),
+  ('D27', 'Managed Open Space'),
+  ('D28', 'Transfer Station'),
+  ('D29', 'Health Center'),
+  ('D30', 'Fresh Water Pumping Station'),
+  ('D31', 'Waste Water Pumping Station'),
+  ('D32', 'Historic House\Site');
  
+---CREATE TABLE asset_subgroup
+ CREATE TABLE  asset_subgroup  (
+   subgroup  text,
+   description  text,
+  PRIMARY KEY ( subgroup )
+);
 
---Create a lookup table for the opa column  
-
-    CREATE TABLE opa ( 
-    opa_id text , 
-    opa_owner text, 
-    opa_address text, 
-    PRIMARY key ( opa_id ) 
-    ); 
-
+--- Insert into asset_subgroup_lookup table
+INSERT into asset_subgroup (subgroup, description)
+VALUES  ('A1', 'Airports'),
+  ('A2', 'City Operations'),
+  ('A3', 'Judiciary Courts'),
+  ('A7', 'Health and Human Services All'),
+  ('A8', 'Libraries'),
+  ('A10', 'Other'),
+  ('A11', 'Parks and Recreation All'),
+  ('A13', 'Public Safety All'),
+  ('A15', 'Public Works and Utilities'),
+  ('A17', 'Transit and Transportation'),
+  ('A18', 'Museums and Zoo'),
+  ('A19', 'Telcom'),
+  ('A2.1', 'Quadplex (MSB, OPB, City Hall, CJC)'),
+  ('A7.1', 'Health Centers (Public) (Dept of Public Health Centers)'),
+  ('A11.2', 'Park Land and Open Space (park land holdings)'),
+  ('A11.3', 'Recreational Resources (rec centers, playgrounds, athletic fields and courts)'),
+  ('A13.1', 'Fire Dept'),
+  ('A13.2', 'Police Dept'),
+  ('A13.3', 'Prisons All (Prison facilities)');
  
+ ------CREATE  asset TABLE-----------------
+CREATE TABLE   asset   (
+    gid   int primary key,
+    asset_id int,
+    asset_name   text,
+    asset_type   text,
+    asset_address   text,
+    status   text,
+    geom GEOMETRY(point, 2272),
+    city_owned   text,
+    not_public   text,
+    cityown_desc   text,
+    serving_type   text,
+    occupant   text,
+    opa_id   text,
+    site_name   text,
+    subgroup   text,
+    subtype   text,
+    note   text,
+  FOREIGN KEY (  note  ) REFERENCES   revision  (  note  ),
+  FOREIGN KEY (  opa_id  ) REFERENCES opa ( opa_id  ),
+  FOREIGN KEY (subtype) REFERENCES asset_subtype  (  subtype  ),
+  FOREIGN KEY (  site_name  ) REFERENCES   site  (  site_name  ),
+  FOREIGN KEY (  subgroup  ) REFERENCES   asset_subgroup  (  subgroup  )
+);
 
--- Insert into opa_lookup 
+	-- Insert into asset
+	INSERT INTO asset (
+	gid, asset_name, asset_type, asset_address, status, geom, site_name, asset_id, city_owned,
+	not_public, cityown_desc, serving_type, occupant, opa_id, 
+	subgroup, subtype, note
+	)
+	SELECT 
+	 cf.gid, cf.asset_name, cf.asset_type, cf.asset_addr, cf.status, cf.geom, cf.site_name, cf.asset_id, 
+	 cf.cityowned, cf.not_public, cf.cityuse_de, cf.serving_ty, cf.occupant, cf.opa_id, 
+	 cf.asset_grou, cf.asset_subt, cf.editnote1
+	FROM City_Facilities as cf
+	INNER JOIN asset ON asset.opa_id = cf.opa_id
+	INNER JOIN asset_subtype ON asset.subtype = asset_subtype.subtype
+	INNER JOIN asset_subgroup ON asset.subgroup = asset_subgroup.subgroup
+	INNER JOIN revision ON asset.note = revision.note
+	INNER JOIN site ON asset.site_name = site.site_name;
 
-    INSERT INTO opa ( 
-    opa_id, opa_owner, opa_address 
-    ) 
-    SELECT 
-    'opa_id', 
-    'opa_owner', 
-    'opa_address'  
-    FROM city_facilities;
+---CREATE TABLE bldg
+CREATE TABLE  bldg  (
+   bldg_id  int PRIMARY KEY,
+   asset_id  int,
+   sharebldg  text, 
+   FOREIGN KEY ( asset_id ) REFERENCES  asset ( asset_id )
+);
 
-----Create a lookup table for the site_lookup column 
-
-    CREATE TABLE site (  
-    site_code text, 
-    site_acres int,  
-    primary_site text, 
-    secondary_site text, 
-    site_address text, 
-    PRIMARY KEY ( site_code ) 
-    ); 
-
--- Insert into site_lookup 
-
-    INSERT INTO site (site_code, site_acres, primary_site, secondary_site, site_address) 
-    SELECT DISTINCT site_code, site_acres, primary_site, secondary_site, site_address 
-    FROM city_facilities; 
-
- 
-
-
----- Create a lookup table for the revision_lookup column 
-
-    CREATE TABLE revision ( 
-    note text, 
-    edit_date text, 
-    edit_source text, 
-    editor text, 
-    PRIMARY KEY ( note )
-    ); 
-
- 
-
--- Insert into revision_lookup 
-
-    INSERT INTO revision (note, edit_date, edit_source, editor) 
-    SELECT DISTINCT note, edit_date, edit_source, editor 
-    FROM City_Facilities; 
----Create a lookup table for the rasset_subtype column     
-
-    CREATE TABLE asset_subtype ( 
-    subtype text, 
-    description text, 
-    PRIMARY KEY ( subtype ) 
-    ); 
-
------ Insert into asset_subtype_lookup 
-
-    INSERT into asset_subtype (subtype, description) 
-    VALUES ('C1', 'Airport Airfield'), 
-    ('C2', 'Airport Terminal\Hanger'), 
-    ('C4', 'Basketball Court1'),  
-    ('C5', 'Barn\Stables'), 
-    ('C3', 'Athletic Field\Soccer Field'), 
-    ('C6', 'Bocci Court'), 
-    ('C7', 'Bridge'), 
-    ('C8', 'City-Owned Land'), 
-    ('C9', 'Compost\Recycling Center'), 
-    ('C10', 'Concessions\Retail\Cafe'), 
-    ('C11', 'Detention Center Adult'), 
-    ('C12', 'Detention Center Youth'),  
-    ('C13', 'Golf Driving Range'), 
-    ('C14', 'Fire Station'), 
-    ('C15', 'Fire Station Marine'), 
-    ('C16', 'Fountain'), 
-    ('C17', 'Garage\Maintenance Building'), 
-    ('C18', 'Golf Course'), 
-    ('C19', 'Greenhouse\Nursery'), 
-    ('C20', 'Health Center'), 
-    ('C21', 'Historic House\Site'), 
-    ('C22', 'Housing\Group Quarters'), 
-    ('C23', 'Ice Rink'), 
-    ('C24', 'Laboratory'), 
-    ('C25', 'Library Branch'), 
-    ('C26', 'Library Central'), 
-    ('C27', 'Library Operations'), 
-    ('C28', 'Library Regional'), 
-    ('C29', 'Library Specialized'), 
-    ('C30', 'Linear Park\Parkway'), 
-    ('C31', 'Breezeway\Island\Managed Area'), 
-    ('C32', 'Kennel'), 
-    ('C33', 'Materials Yard'), 
-    ('C34', 'Multi-Use\Office Building'), 
-    ('C35', 'Museum'), 
-    ('C36', 'Neighborhood Park'), 
-    ('C37', 'Nursing Home'), 
-    ('C38', 'Older Adult Center'), 
-    ('C39', 'Parking Lot'), 
-    ('C40', 'Pavilion\Shelter'), 
-    ('C41', 'Pier'), 
-    ('C42', 'Playground'), 
-    ('C43', 'Police Station'), 
-    ('C44', 'Police Sub-Station'), 
-    ('C45', 'Police Operations\Unit'), 
-    ('C46', 'Pool'), 
-    ('C47', 'Radio\Cell Tower'), 
-    ('C48', 'Public Safety Training Center'), 
-    ('C49', 'Recreation Building'), 
-    ('C50', 'Recreation Center'), 
-    ('C51', 'Recreation Other'), 
-    ('C54', 'Regional\Metro Park'), 
-    ('C55', 'Restrooms'), 
-    ('C56', 'Fish Ladder'), 
-    ('C57', 'Salt Shed'), 
-    ('C58', 'Skateboard Park'), 
-    ('C60', 'Spray Ground'), 
-    ('C61', 'Square\Plaza'), 
-    ('C63', 'Stage\Stands'), 
-    ('C64', 'Statue\Monument'), 
-    ('C65', 'Shed'), 
-    ('C67', 'Tennis Court'), 
-    ('C68', 'Athletic Track'), 
-    ('C69', 'Trailers'), 
-    ('C70', 'Transfer Station'), 
-    ('C71', 'Transit Station'), 
-    ('C73', 'Warehouse'), 
-    ('C74', 'Waste Water Storage'), 
-    ('C75', 'Waste Water Processing Facility'), 
-    ('C76', 'Water Pumping Station'), 
-    ('C77', 'Water Filter\Processing Facility'), 
-    ('C78', 'Water Storage'), 
-    ('C79', 'Watershed\Conservation Park'), 
-    ('C80', 'Zoo\Animal Habitat'), 
-    ('C81', 'Other'), 
-    ('C82', 'Fuel Pump'), 
-    ('C83', 'Helipad'), 
-    ('C84', 'Dog Run'), 
-    ('C85', 'Volleyball Court'), 
-    ('C86', 'Judicial Court Building'), 
-    ('C87', 'Baseball Field'), 
-    ('C88', 'Street Hockey Court\Rink'), 
-    ('C89', 'Batting Cage'), 
-    ('C90', 'Handball Court'), 
-    ('C91', 'Recreation/Bike Trail'), 
-    ('C92', 'Generator'), 
-    ('C93', 'Dam'), 
-    ('D1', 'Warehouse'), 
-    ('D2', 'Automotive Shop'), 
-    ('D3', 'Operations Center'), 
-    ('D4', 'Training Center'), 
-    ('D5', 'Marine Unit'), 
-    ('D6', 'Gymnasium'), 
-    ('D8', 'Indoor'), 
-    ('D9', 'Maintenance Shop'), 
-    ('D10', 'Multi-Use\Office Building'), 
-    ('D11', 'Non-Programmed Recreation'), 
-    ('D12', 'Office Building'), 
-    ('D13', 'Park Land'), 
-    ('D14', 'Judicial Court'), 
-    ('D15', 'Outdoor'), 
-    ('D16', 'Pier'), 
-    ('D17', 'Playground Equipment'), 
-    ('D18', 'Programmed Recreation'), 
-    ('D20', 'Vacant'), 
-    ('D22', 'Recreation Land'), 
-    ('D23', 'Laboratory'), 
-    ('D24', 'Police Station'), 
-    ('D25', 'Police Unit'), 
-    ('D26', 'Fire Station'), 
-    ('D27', 'Managed Open Space'), 
-    ('D28', 'Transfer Station'), 
-    ('D29', 'Health Center'), 
-    ('D30', 'Fresh Water Pumping Station'), 
-    ('D31', 'Waste Water Pumping Station'), 
-    ('D32', 'Historic House\Site'); 
-
----CREATE TABLE asset_subgroup 
-
-    CREATE TABLE asset_subgroup ( 
-    subgroup text, 
-    description text, 
-    PRIMARY KEY ( subgroup ) 
-    ); 
---- Insert into asset_subgroup_lookup table 
-
-    INSERT into asset_subgroup (subgroup, description) 
-    VALUES ('A1', 'Airports'), 
-    ('A2', 'City Operations'), 
-    ('A3', 'Judiciary Courts'), 
-    ('A7', 'Health and Human Services All'), 
-    ('A8', 'Libraries'), 
-    ('A10', 'Other'), 
-    ('A11', 'Parks and Recreation All'), 
-    ('A13', 'Public Safety All'), 
-    ('A15', 'Public Works and Utilities'), 
-    ('A17', 'Transit and Transportation'), 
-    ('A18', 'Museums and Zoo'), 
-    ('A19', 'Telcom'), 
-    ('A2.1', 'Quadplex (MSB, OPB, City Hall, CJC)'), 
-    ('A7.1', 'Health Centers (Public) (Dept of Public Health Centers)'), 
-    ('A11.2', 'Park Land and Open Space (park land holdings)'), 
-    ('A11.3', 'Recreational Resources (rec centers, playgrounds, athletic fields and courts)'), 
-    ('A13.1', 'Fire Dept'), 
-    ('A13.2', 'Police Dept'), 
-    ('A13.3', 'Prisons All (Prison facilities)');
-
-------CREATE asset TABLE 
-
-    CREATE TABLE asset ( 
-    gid int PRIMARY KEY, 
-    asset_name text, 
-    asset_type text, 
-    asset_address text, 
-    status text, 
-    geom GEOMETRY(Point, 2272), 
-    site_name text, 
-    asset_id int, 
-    city_owned boolean, 
-    non_public boolean, 
-    cityown_desc text, 
-    serving_type text, 
-    occupant text, 
-    opa_id text, 
-    site_code text, 
-    asset_subgroup text, 
-    asset_subtype text, 
-    revision_note text, 
-    FOREIGN KEY (opa_id) REFERENCES opa (opa_id), 
-    FOREIGN KEY (site_code) REFERENCES site (site_code), 
-    FOREIGN KEY (revision_note) REFERENCES revision (note), 
-    FOREIGN KEY (asset_subtype) REFERENCES asset_subtype (subtype), 
-    FOREIGN KEY (asset_subgroup) REFERENCES asset_subgroup (subgroup)); 
-
--- Insert into asset 
-
-    INSERT INTO asset ( 
-    gid, asset_name, asset_type, asset_address, status, geom, site_name, asset_id, city_owned, non_public, cityown_desc, serving_type, occupant, opa_id, site_code, asset_subgroup,  asset_subtype, revision_note 
-    ) 
-    SELECT  
-          gid, asset_name, asset_type, asset_address, status, geom      GEOMETRY(Point, 2272), site_name, asset_id,  city_owned, non_public, cityown_desc, serving_type, occupant, opa_id, site_code,  asset_subgroup, asset_subtype, revision_note 
-    FROM city_facilities; 
-
----CREATE TABLE bldg 
-
-    CREATE TABLE bldg ( 
-    bldg_id int, 
-    bldg_age int, 
-    bldg_fl int, 
-    bldg_sqft int, 
-    bldg_sqftuse int, 
-    bldg_yr int, 
-    asset_gid int, 
-    shared_bldg text,  
-    PRIMARY KEY ( bldg_id ), 
-    FOREIGN KEY ( asset_gid ) REFERENCES asset ( gid ) 
-    ); 
-
--- Insert into bldg 
-
-   
-
-    INSERT INTO bldg (bldg_id, bldg_age, bldg_fl, bldg_sqft, bldg_sqftuse, bldg_yr, asset_gid, shared_bldg) 
-        SELECT  bldg_id, bldg_age, bldg_fl, bldg_sqft, bldg_sqftuse, bldg_yr, asset_gid, shared_bldg 
-    FROM city_facil
+-- Insert into bldg
+INSERT INTO bldg (bldg_id, sharebldg, asset_id)
+SELECT cf.buildingid, cf.sharebldg_ , cf.asset_id
+from (
+    select cf.buildingid, cf.sharebldg_,cf.asset_id,
+    ROW_NUMBER() over (partition by cf.buildingid order by cf.buildingid) as rn
+FROM city_facilities cf
+where cf.buildingid is not null 
+) as cf
+where cf.rn = 1;
 
    Appendix – 4 
 Data Dictionary 
