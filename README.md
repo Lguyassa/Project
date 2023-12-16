@@ -85,41 +85,8 @@ Normalization Process:
 Normalization involves organizing data to eliminate redundancy and dependency issues.
 The script creates separate tables for different entities such as opa, site, revision, asset_subtype, asset_subgroup, asset, and bldg.
 Each table has a primary key to uniquely identify records, and foreign keys establish relationships between tables.
+
 ERD (Entity-Relationship Diagram):
-
-+-----------------+    +--------------+    +----------------+    +-------------------+
-|      opa        |    |    site      |    |    revision    |    |   asset_subtype   |
-+-----------------+    +--------------+    +----------------+    +-------------------+
-| opa_id (PK)     |    | site_name (PK)|    | note (PK)      |    | subtype (PK)      |
-| opa_owner        |    | site_code     |    | edit_date       |    | description       |
-| opa_address      |    | site_acres    |    | edit_source     |    +-------------------+
-+-----------------+    | primary_site  |    | editor          |
-                      | secondary_site|    +----------------+
-                      +--------------+
-
-+-------------------+   +----------------+   +------------------+   +------------------+
-| asset_subgroup    |   |      asset     |   |      bldg        |   |    City_Facilities|
-+-------------------+   +----------------+   +------------------+   +------------------+
-| subgroup (PK)     |   | gid (PK)       |   | bldg_id (PK)     |   | gid              |
-| description       |   | asset_id       |   | sharebldg        |   | asset_id         |
-+-------------------+   | asset_name     |   | asset_id (FK)    |   | asset_name       |
-                       | asset_type     |   +------------------+   | asset_type       |
-                       | asset_address  |                           | asset_addr       |
-                       | status         |                           | status           |
-                       | geom           |                           | geom             |
-                       | city_owned     |                           | cityowned        |
-                       | not_public     |                           | not_public       |
-                       | cityown_desc   |                           | cityuse_de       |
-                       | serving_type   |                           | serving_ty       |
-                       | occupant       |                           | occupant         |
-                       | opa_id (FK)    |                           | opa_id           |
-                       | site_name (FK) |                           | site_name        |
-                       | subgroup (FK)  |                           | asset_subgroup   |
-                       | subtype (FK)   |                           | asset_subtype    |
-                       | note (FK)      |                           | editnote1        |
-                       +----------------+                           +------------------+
-This diagram represents the relationships between the tables. Arrows indicate foreign key relationships, and (PK) denotes the primary key. 
-ERD (Entity-Relationship Diagram) 
 
 ![ERD_Project_final](https://github.com/Lguyassa/Project/assets/89851403/713fb6de-b109-4dc6-99ec-b2a00125d1e4)
 
