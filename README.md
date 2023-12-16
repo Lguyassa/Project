@@ -305,19 +305,20 @@ CREATE TABLE  site  (
    site_name  text,
   PRIMARY KEY ( site_name )
 );
-
 -- Insert into site_lookup
+
 INSERT INTO site (site_code, site_acres, primary_site, secondary_site, site_name)
 select cf.site_code, cf.site_acres, cf.primarysit, cf.secondarys, cf.site_name
 FROM (
     select cf.site_code, cf.site_acres, cf.primarysit, cf.secondarys, cf.site_name,  
     row_number () over (partition by cf.site_name order by cf.site_name) as rn 
-  from city_facilities cf
- where cf.site_name  is NOT NULL
+from city_facilities cf
+where cf.site_name  is NOT NULL
 ) as cf
 where cf.rn = 1;
 
----- Create a lookup table for the revision_lookup column
+---- Create a lookup table for the revision_lookup column----
+
  CREATE TABLE  revision  (
    note  text,
    edit_date  text,
@@ -327,6 +328,7 @@ where cf.rn = 1;
 );
 
 -- Insert into revision_lookup
+
 INSERT INTO revision (note, edit_date, edit_source, editor)
 SELECT cf.editnote1,cf.editdate, cf.editsource, cf.editor
 FROM (
@@ -497,7 +499,7 @@ VALUES  ('A1', 'Airports'),
  
  ------CREATE  asset TABLE-----------------
  
-CREATE TABLE   asset   (
+  CREATE TABLE   asset   (
     gid   int primary key,
     asset_id int,
     asset_name   text,
@@ -522,23 +524,23 @@ CREATE TABLE   asset   (
   FOREIGN KEY (  subgroup  ) REFERENCES   asset_subgroup  (  subgroup  )
 );
 
-	-- Insert into asset
+-- Insert into asset
  
-	INSERT INTO asset (
+INSERT INTO asset (
 	gid, asset_name, asset_type, asset_address, status, geom, site_name, asset_id, city_owned,
 	not_public, cityown_desc, serving_type, occupant, opa_id, 
 	subgroup, subtype, note
 	)
-	SELECT 
+SELECT 
 	 cf.gid, cf.asset_name, cf.asset_type, cf.asset_addr, cf.status, cf.geom, cf.site_name, cf.asset_id, 
 	 cf.cityowned, cf.not_public, cf.cityuse_de, cf.serving_ty, cf.occupant, cf.opa_id, 
 	 cf.asset_grou, cf.asset_subt, cf.editnote1
-	FROM City_Facilities as cf
-	INNER JOIN asset ON asset.opa_id = cf.opa_id
-	INNER JOIN asset_subtype ON asset.subtype = asset_subtype.subtype
-	INNER JOIN asset_subgroup ON asset.subgroup = asset_subgroup.subgroup
-	INNER JOIN revision ON asset.note = revision.note
-	INNER JOIN site ON asset.site_name = site.site_name;
+FROM City_Facilities as cf
+INNER JOIN asset ON asset.opa_id = cf.opa_id
+INNER JOIN asset_subtype ON asset.subtype = asset_subtype.subtype
+INNER JOIN asset_subgroup ON asset.subgroup = asset_subgroup.subgroup
+INNER JOIN revision ON asset.note = revision.note
+INNER JOIN site ON asset.site_name = site.site_name;
 
 ---CREATE TABLE bldg
 
@@ -560,6 +562,10 @@ FROM city_facilities cf
 where cf.buildingid is not null 
 ) as cf
 where cf.rn = 1;
+
+
+
+
 
    Appendix – 4 
 Data Dictionary 
